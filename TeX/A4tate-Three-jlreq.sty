@@ -1,0 +1,128 @@
+%%% ページスタイル %%%
+\NewPageStyle{hajime}{% 「はじめに」のページスタイル
+%running_head_position=top-left,% 柱の位置
+%running_head_font=\footnotesize,% 柱のフォントサイズ
+nombre_position=bottom-center,% ノンブルの位置
+%odd_running_head=,% 奇数ページの柱
+%even_running_head=,% 偶数ページの柱
+}
+
+\NewPageStyle{honbun}{% 本文のページスタイル
+running_head_position=top-left,% 柱の位置
+running_head_font=\footnotesize,% 柱のフォントサイズ
+nombre_position=bottom-center,% ノンブルの位置
+odd_running_head=_chapter,% 奇数ページの柱
+even_running_head=,% 偶数ページの柱
+}
+
+\NewPageStyle{chapter}{% 「chapter」のページスタイル
+%running_head_position=top-left,% 柱の位置
+%running_head_font=\footnotesize,% 柱のフォントサイズ
+nombre_position=bottom-center,% ノンブルの位置
+%odd_running_head=,% 奇数ページの柱
+%even_running_head=,% 偶数ページの柱
+}
+
+\NewPageStyle{atogaki}{% 「あとがき」のページスタイル
+%running_head_position=top-left,% 柱の位置
+%running_head_font=\footnotesize,% 柱のフォントサイズ
+nombre_position=bottom-center,% ノンブルの位置
+%odd_running_head=,% 奇数ページの柱
+%even_running_head=,% 偶数ページの柱
+}
+%%% ページスタイルここまで %%%
+
+%%% 目次（\tableofcontents）設定 %%%
+\makeatletter
+%\renewcommand{\@pnumwidth}{3\jlreq@mol}% 点線とページ番号との間
+\renewcommand{\@dotsep}{2}% 点線の間隔
+\setlength\toclineskip{0.5\jlreq@gol plus .02\jlreq@gol}% 最初の数値が行間
+\makeatother
+
+%目次の部（part）の設定。
+%\renewcommand*{\l@区分}{\@dottedtocline{レベル}{インデント量}{ラベル幅（数字＋余白）}}
+\makeatletter
+\renewcommand*{\l@part}{\@dottedtocline{1}{3\zh}{5\zh}}
+\makeatother
+
+%目次の章（chapter）の設定。
+%\renewcommand*{\l@区分}{\@dottedtocline{レベル}{インデント量}{ラベル幅（数字＋余白）}}
+\makeatletter
+\renewcommand*{\l@chapter}{\@dottedtocline{1}{4\zh}{2\zh}}
+\makeatother
+
+%目次の節（section）の設定。
+%\renewcommand*{\l@区分}{\@dottedtocline{レベル}{インデント量}{ラベル幅（数字＋余白）}}
+\makeatletter
+\renewcommand*{\l@section}{\@dottedtocline{1}{6\zh}{2\zh}}
+\makeatother
+%%% 目次の設定ここまで %%%
+
+
+%本文中の chapter（章） 設定
+\ModifyHeading{chapter}{
+%pagebreak=begin_with_odd_page,% 奇数ページ起こし
+font=\fontsize{24pt}{1.7\zw}\selectfont,%フォントサイズ14pt、行送り1.7文字分
+label_format={\thechapter},% 漢数字のみ。第」や「章」を表示させない
+}
+
+%ルビや傍点　　例 \ruby{山﨑}{やま|さき} 
+\usepackage{pxrubrica}
+
+%下線・波線・囲み文字　https://github.com/doraTeX/breakfbox から uline--.sty と breakfbox.sty を入手
+%\usepackage[usetype1]{myuline--}
+\usepackage{breakfbox}
+
+%縦中横数字＆minipageで<y>を使えるようにする
+\usepackage{lltjext}
+
+%画像
+\usepackage{graphicx}
+
+%写真のキャプションに「図」を入れない
+\renewcommand{\figurename}{}
+%画像まわり再定義
+\makeatletter
+\renewcommand{\thefigure}{%
+%\ifnum\c@chapter>\z@\thechapter{}・\fi\rensuji{\@arabic\c@figure} %%画像のキャプションに余計な文字や数字を入れない
+ }
+\def\fps@figure{tbp}
+\def\ftype@figure{1}
+\def\ext@figure{lof}
+\def\fnum@figure{\figurename\thefigure}
+\makeatother
+
+%キャプションのフォントサイズ等
+\jlreqsetup{
+caption_font=\normalsize,
+caption_label_font=\normalsize,
+}
+
+%ダッシュをつなげる　参照：https://qiita.com/isari/items/1d0b60b76c7ef168e376
+\usepackage{newunicodechar}
+\makeatletter
+\chardef\my@J@horizbar="2015% Unicodeの2015
+\newunicodechar{―}{\x@my@dash}
+\def\x@my@dash{\@ifnextchar―{%
+  \my@J@horizbar\kern-.5\zw\my@J@horizbar\kern-.5\zw}{%
+    \my@J@horizbar}}
+% 次が―なら2回目のkernまでを、そうでないなら普通の―を出力
+\makeatother
+
+% 〜をつなげる。例）\〜\〜\〜〜！　最後だけ「〜」を２つにする。
+\def\〜{〜\kern-0.25\zw}
+
+%濁点　例）\dakuten{あ}　参照：https://tadeku.net/94393/
+\usepackage{bxghost}
+\newcommand{\dakuten}[1]{%
+    \jghostguarded{%
+        \leavevmode\hbox to 1\zw{%
+            \rensuji{\hbox to 1\zw{#1\hspace*{-.25\zw}゛}}%
+        }%
+    }%
+}
+
+%段落頭の「 の字下げ調整に bxjaprnind パッケージを使用
+\usepackage[force]{bxjaprnind}
+\useparheadparenindent
+\parheadparenindentamount{-0.5}
