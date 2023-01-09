@@ -6,16 +6,42 @@ function replaceAozoraTag(line:string){
   return line
     // 行頭字下げはTeXに任せる
     .replace(new RegExp('^　+'),'')
+    // 左右中央（厳密な中央はあきらめ）
+    .replace('［＃ページの左右中央］','\\newpage')
     // 米印 TODO: あとでほかの者にも対応
-    .replace(new RegExp('※［＃米印、1-2-8］','g'),'※')
+    .replace('※［＃米印、1-2-8］','※')
+    // 矢印
+    .replace('［＃改ページ］','\\columnbreak')
     // 改行
-    .replace(new RegExp('［＃改ページ］','g'),'\\columnbreak')
+    .replace('［＃改ページ］','\\columnbreak')
     // 区切り線
-    .replace(new RegExp('［＃区切り線］','g'),'\\hrulefill')
+    .replace('［＃区切り線］','\\hrulefill')
+    // 矢印
+    .replace(new RegExp('([→↓←↑])','g'),function(){
+      switch (arguments[1]) {
+        case '→':
+          return '↑'       
+          break;
+        case '↓':
+          return '→'          
+          break;
+        case '←':
+          return '↓'          
+          break;
+        case '↑':
+          return '←'          
+          break;
+        default:
+          return arguments[1]
+          break;
+      }
+    })
+    // 字下げ 無視する
+    .replace(new RegExp('［＃[１-９]字下げ］'),'')
     // セクションマーク
     .replace(new RegExp('^[ 　]+§^[ 　]+'),'\\hspace{3\\zw}\\hbox{\\yoko §}')
     // 中揃えの空白文字
-    .replace(new RegExp('［　空白　］','g'),'centerline[空白]')
+    .replace(new RegExp('［　空白　］','g'),'\\null\\vfill\\center{空白}\\vfill\\clearpage')
 
     // 二重山括弧
     .replace(new RegExp('［＃始め二重山括弧］([^［]+)［＃終わり二重山括弧］','g'),function(){
@@ -33,11 +59,12 @@ function replaceAozoraTag(line:string){
     .replace(new RegExp('［＃縦中横］([^［]+)［＃縦中横終わり］','g'),function(){
       return `\\hbox{\\yoko ${arguments[1]}}`
     })
+    // 連数字
     .replace(new RegExp('[0-9]+','g'),function(){
       if(arguments[1].length <= 3){
         return `\\hbox{\\yoko ${arguments[1]}}`
       } else {
-        return `${arguments[0]}`
+        return arguments[0]
       }
     })
     // ルビ
@@ -48,53 +75,13 @@ function replaceAozoraTag(line:string){
     .replace(new RegExp('［＃挿絵（挿絵/([^）]+)）入る］','g'),function(){
       return `『挿絵${arguments[1]}』`
     })
-    // 左右中央（厳密な中央はあきらめ）
-    .replace(new RegExp('［＃ページの左右中央］','g'),'\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n')
-    // 字下げ
-    .replace(new RegExp('［＃[１-９]字下げ］','g'),function(){
-      let tag=''  
-      switch(arguments[1]){
-          case '１':
-            tag='\\hspace{1\\zw}'
-            break
-          case '２':
-            tag='\\hspace{2\\zw}'
-            break
-          case '３':
-            tag='\\hspace{3\\zw}'
-            break
-          case '４':
-            tag='\\hspace{4\\zw}'
-            break
-          case '５':
-            tag='\\hspace{5\\zw}'
-            break
-          case '６':
-            tag='\\hspace{6\\zw}'
-            break
-          case '７':
-            tag='\\hspace{7\\zw}'
-            break
-          case '８':
-            tag='\\hspace{8\\zw}'
-            break
-          case '９':
-            tag='\\hspace{9\\zw}'
-            break
-          default:
-            // 字下げは行わない
-            tag=''
-            break
-        }
-      return tag
-    })
     // 開始タグ・終了タグ
     // 前書き
-    .replace(new RegExp('［＃ここから前書き］','g'),'\\leftskip=5\\zw\\begin{minipage}{20\\zw}\\hrulefill')
-    .replace(new RegExp('［＃ここで前書き終わり］','g'),'\\hrulefill\\end{minipage}\\leftskip=0\\zw')
+    .replace(new RegExp('［＃ここから前書き］','g'),'\\begin{flushright}\\begin{minipage}{17\\zw}')
+    .replace(new RegExp('［＃ここで前書き終わり］','g'),'\\hrulefill\\end{minipage}\\end{flushright}')
     // 後書き
-    .replace(new RegExp('［＃ここから後書き］','g'),'\\leftskip=5\\zw\\begin{minipage}{20\\zw}\\hrulefill')
-    .replace(new RegExp('［＃ここで後書き終わり］','g'),'\\hrulefill\\end{minipage}\\leftskip=0\\zw')
+    .replace(new RegExp('［＃ここから後書き］','g'),'\\begin{flushright}\\begin{minipage}{17\\zw}\\hrulefill')
+    .replace(new RegExp('［＃ここで後書き終わり］','g'),'\\end{minipage}\\end{flushright}')
     // 小書き
     .replace(new RegExp('［＃小書き］([^［]+)［＃小書き終わり］','g'),function(){
       return `\\footnotesize ${arguments[1]} \\normalsize`
@@ -103,20 +90,18 @@ function replaceAozoraTag(line:string){
     .replace(new RegExp('［＃ここから地付き］([^［]+)［＃ここで地付き終わり］','g'),function(){
       return `\\rightline{${arguments[1]}}`
     })
-    
     // 大見出しの柱
     .replace(new RegExp('［＃ここから柱］([^［]+)［＃ここで柱終わり］','g'),function(){
-      return `\\end{multicols*}\\hspace{1\\zw}${arguments[1]}\\begin{multicols*}{3}`
+      return `\\end{multicols*}\\large{\\hspace{1\\zw}${arguments[1]}}\\begin{multicols*}{3}`
     })
     // 大見出し
     .replace(new RegExp('［＃大見出し］([^［]+)［＃大見出し終わり］','g'),function(){
-      return `\\end{multicols*}\\section{${arguments[1]}}\\begin{multicols*}{3}`
+      return `\\end{multicols*}\\section*{${arguments[1]}}\\begin{multicols*}{3}`
     })
     // 中見出し
     .replace(new RegExp('［＃中見出し］([^［]+)［＃中見出し終わり］','g'),function(){
-      return `\\hspace{1\\zw}\\large{\\textbf{${arguments[1]}}}\n\n`
+      return `\\hspace{1\\zw}\\large{\\textbf{${arguments[1]}}}\\newline`
     })
-
     // 1行1段落とするため空行も合わせて追加 
     + '\n\n'
 }
@@ -132,11 +117,13 @@ function replaceAozoraTag(line:string){
 
 
 
-const filePath = Deno.args[0]
+//const filePath = Deno.args[0]
+const filePath = "./narou.txt"
 const file = await Deno.open(filePath);
 
 const encoder = new TextEncoder();
-const distPath = Deno.args[1]
+// const distPath = Deno.args[1]
+const distPath = "./TeX/out.tex"
 
 const lineseparator = new RegExp('[\r\n]+')
 
@@ -161,14 +148,14 @@ try {
 
       const hyoshi=
       // 表紙
-         '\\thispagestyle{empty}\n'
-       + '\\begin{minipage}{170truemm}\n'
-       + '\\null\\vspace{95truemm}\n'
-       + '\\begin{center}\n'
+         '\\end{multicols*}\n'
+       + '\\thispagestyle{empty}\n'
+       + '\\null\\vfill'
        + `{\\LARGE ${title}}\\hspace{2\\zw}{\\large ${author}}`
-       + '\\end{center}\n'
-       + '\\end{minipage}\n'
+       + '\\vfill'
+       + '\\clearpage'
        + '\\newpage\n'
+       + '\\begin{multicols*}{3}\n'
 
        const data = encoder.encode(hyoshi);
        await Deno.writeFile(distPath, data, {append: true});          
