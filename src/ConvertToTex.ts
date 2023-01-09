@@ -10,8 +10,6 @@ function replaceAozoraTag(line:string){
     .replace('［＃ページの左右中央］','\\newpage')
     // 米印 TODO: あとでほかの者にも対応
     .replace('※［＃米印、1-2-8］','※')
-    // 矢印
-    .replace('［＃改ページ］','\\columnbreak')
     // 改行
     .replace('［＃改ページ］','\\columnbreak')
     // 区切り線
@@ -39,7 +37,7 @@ function replaceAozoraTag(line:string){
     // 字下げ 無視する
     .replace(new RegExp('［＃[１-９]字下げ］'),'')
     // セクションマーク
-    .replace(new RegExp('^[ 　]+§^[ 　]+'),'\\hspace{3\\zw}\\hbox{\\yoko §}')
+    .replace(new RegExp('^[ 　]+§^[ 　]+'),'\\hspace{7\\zw}\\hbox{\\yoko §}')
     // 中揃えの空白文字
     .replace(new RegExp('［　空白　］','g'),'\\null\\vfill\\center{空白}\\vfill\\clearpage')
 
@@ -71,10 +69,12 @@ function replaceAozoraTag(line:string){
     .replace(new RegExp('｜([^《]+)《([^》]+)》','g'),function(){
       return `\\ruby[g]{${arguments[1]}}{${arguments[2]}}`
     })
+
     // 挿絵 TODO:対応するか考える
     .replace(new RegExp('［＃挿絵（挿絵/([^）]+)）入る］','g'),function(){
       return `『挿絵${arguments[1]}』`
     })
+
     // 開始タグ・終了タグ
     // 前書き
     .replace(new RegExp('［＃ここから前書き］','g'),'\\begin{flushright}\\begin{minipage}{17\\zw}')
@@ -90,6 +90,7 @@ function replaceAozoraTag(line:string){
     .replace(new RegExp('［＃ここから地付き］([^［]+)［＃ここで地付き終わり］','g'),function(){
       return `\\rightline{${arguments[1]}}`
     })
+
     // 大見出しの柱
     .replace(new RegExp('［＃ここから柱］([^［]+)［＃ここで柱終わり］','g'),function(){
       return `\\end{multicols*}\\large{\\hspace{1\\zw}${arguments[1]}}\\begin{multicols*}{3}`
@@ -102,6 +103,7 @@ function replaceAozoraTag(line:string){
     .replace(new RegExp('［＃中見出し］([^［]+)［＃中見出し終わり］','g'),function(){
       return `\\hspace{1\\zw}\\large{\\textbf{${arguments[1]}}}\\newline`
     })
+
     // 1行1段落とするため空行も合わせて追加 
     + '\n\n'
 }
