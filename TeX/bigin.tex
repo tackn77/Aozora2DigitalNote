@@ -1,0 +1,24 @@
+\documentclass[
+tate,
+book,
+openany,
+paper={202mm,270mm},
+oneside,
+fontsize=9pt,        % 欧文フォントサイズ
+jafontsize=9pt,      % 和文フォントサイズ
+head_space=11truemm, % 天の余白
+gutter=8truemm,      % ノドの余白
+line_length=78zw,    % 1行の文字数
+number_of_lines=35,  % 行数
+column_gap=5truemm,  % 段間
+headfoot_verticalposition=4truemm, %本文とヘッダ/フッタの間の空き
+draft
+]{jlreq}
+\jlreqsetup{mainmatter_pagebreak=clearpage}
+
+\usepackage{multicol}
+\usepackage{A4tate-Three-jlreq} % A5tate-two-jlreq.sty を適用
+
+\begin{document}
+\pagestyle{honbun}
+\begin{multicols*}{3}
